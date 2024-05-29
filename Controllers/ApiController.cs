@@ -137,6 +137,53 @@ namespace WeatherApi.Controllers
             return Ok(weatherResponse);
         }
 
+        [HttpGet("50/{nr_tel}/{kod}")]
+        public IActionResult GetLast50Weather(string nr_tel, string kod)
+        {
+            // Check if the station exists
+            if (!_context.Station.Any(s => s.NrTel == nr_tel && s.Kod == kod))
+            {
+                return NotFound();
+            }
+
+            var record = _context.Station.FirstOrDefault(s => s.NrTel == nr_tel && s.Kod == kod);
+            if (record == null)
+            {
+                return NotFound("record was not found");
+            }
+
+            // Retrieve station details
+            Guid stationId = record.StationId;
+            double? bateria = record.Bateria;
+            double lat = record.SzerokoscGeo;
+            double longi = record.DlugoscGeo;
+
+            // Retrieve the last 50 weather records for the station
+            var lastWeatherRecords = _context.Weather
+                .Where(w => w.StationId == stationId)
+                .OrderByDescending(w => w.Czas)
+                .Take(50)
+                .ToList();
+
+            if (!lastWeatherRecords.Any())
+            {
+                return NotFound();
+            }
+
+            // Map weather data
+            var weatherResponses = lastWeatherRecords.Select(lastWeather => new WeatherResponse(
+                bateria,
+                lastWeather.Temperatura,
+                lastWeather.Cisnienie,
+                lastWeather.Wilgotnosc,
+                lastWeather.Czas,
+                lat,
+                longi
+            )).ToList();
+
+            // Return as JSON
+            return Ok(weatherResponses);
+        }
 
         [HttpGet("station/{nr_tel}/{kod}")]
         public IActionResult GetStation(string nr_tel, string kod)
