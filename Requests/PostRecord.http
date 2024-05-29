@@ -1,0 +1,14 @@
+# For more info on HTTP files go to https://aka.ms/vs/httpfile
+POST
+Content-Type: application:json
+
+{
+      "nr_tel": "123456789",
+      "kod": "369",
+      "bateria": 90,
+      "temp": 30,
+      "press": 1000,
+      "humi": 80,
+      "lat": 50.5453,
+      "longi": 45.8954
+}
