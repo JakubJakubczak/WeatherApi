@@ -20,7 +20,6 @@ namespace WeatherApi.Controllers
         }
 
 
-        // Requst dac, możliwe, ze GUID i tworzenie nowych ID, mapowanie requesta na metode post
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] StationWeatherRequest request)
         {
@@ -53,7 +52,7 @@ namespace WeatherApi.Controllers
             }
             else 
             {
-                var updateData = _context.Station.FirstOrDefault(s => s.Kod == kod && s.Kod == kod);
+                var updateData = _context.Station.FirstOrDefault(s => s.NrTel == nr_tel && s.Kod == kod);
                 if (updateData == null)
                 {
                     // error
@@ -66,7 +65,7 @@ namespace WeatherApi.Controllers
             }
            
 
-            var record = _context.Station.FirstOrDefault(s => s.Kod == kod && s.Kod == kod);
+            var record = _context.Station.FirstOrDefault(s => s.NrTel == nr_tel && s.Kod == kod);
             if (record == null)
             {
                 // error
@@ -87,7 +86,6 @@ namespace WeatherApi.Controllers
         {
             // sprawdzenie czy taka stacja istnieje
 
-            //Debug.WriteLine("0");
             if (!(_context.Station.Any(s => s.NrTel == nr_tel && s.Kod == kod)))
             {
                 return NotFound();
@@ -104,22 +102,12 @@ namespace WeatherApi.Controllers
             double? bateria = record.Bateria;
             double lat = record.SzerokoscGeo;
             double longi = record.DlugoscGeo;
-            //Debug.WriteLine($"id: {stationId}");
-            //Debug.WriteLine($"bateria: {bateria}");
-            //Debug.WriteLine($"lat: {lat}");
-            //Debug.WriteLine($"longi: {longi}");
-            // znalezc ostatnio pogode  tej stacji i zmapowac dane
+ 
 
-            //Debug.WriteLine("1");
             var lastWeather = _context.Weather
                 .Where(w => w.StationId == stationId)
                 .OrderByDescending(w => w.Czas)
                 .FirstOrDefault();
-            //Debug.WriteLine("Last Weather:");
-            //Debug.WriteLine($"Temperature: {lastWeather?.Temperatura}");
-            //Debug.WriteLine($"Pressure: {lastWeather?.Cisnienie}");
-            //Debug.WriteLine($"Humidity: {lastWeather?.Wilgotnosc}");
-            //Debug.WriteLine($"Time: {lastWeather?.Czas}");
             if (lastWeather == null)
             {
                 // No weather record found
@@ -130,10 +118,8 @@ namespace WeatherApi.Controllers
             double press = lastWeather.Cisnienie;
             double humi = lastWeather.Wilgotnosc;
             DateTime time = lastWeather.Czas;
-            //Debug.WriteLine("After maping:");
             WeatherResponse weatherResponse = new WeatherResponse(bateria, temp, press, humi, time, lat, longi);
             // zwrocic jako json
-            //Debug.WriteLine("Before returning:");
             return Ok(weatherResponse);
         }
 
@@ -190,7 +176,6 @@ namespace WeatherApi.Controllers
         {
             // sprawdzicz czy taka stacja istnieje
 
-            //Debug.WriteLine("0");
             if (!(_context.Station.Any(s => s.NrTel == nr_tel && s.Kod == kod)))
             {
                 return NotFound();
@@ -206,13 +191,8 @@ namespace WeatherApi.Controllers
             double? bateria = record.Bateria;
             double lat = record.SzerokoscGeo;
             double longi = record.DlugoscGeo;
-            //Debug.WriteLine($"bateria: {bateria}");
-            //Debug.WriteLine($"lat: {lat}");
-            //Debug.WriteLine($"longi: {longi}");    
-            //Debug.WriteLine("After maping:");
             StationResponse StationResponse = new StationResponse(bateria, lat, longi);
             // zwrocic jako json
-            //Debug.WriteLine("Before returning:");
             return Ok(StationResponse);
         }
     }
